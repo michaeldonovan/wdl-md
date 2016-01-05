@@ -97,7 +97,6 @@ static bool ClipFLine(float* x1, float* y1, float* x2, float*y2, int w, int h)
   int e1 = OffscreenFTest(tx1, ty1, tw, th); 
   int e2 = OffscreenFTest(tx2, ty2, tw, th);
   
-  int timeout = 32;
   bool accept = false, done = false;
   do
   {
@@ -149,7 +148,7 @@ static bool ClipFLine(float* x1, float* y1, float* x2, float*y2, int w, int h)
       }
     }
   }
-  while (!done && timeout--);
+  while (!done);
 
   *x1 = tx1;
   *y1 = ty1;

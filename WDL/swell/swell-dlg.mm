@@ -36,11 +36,7 @@ static LRESULT sendSwellMessage(id obj, UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 
 
-static BOOL useNoMiddleManCocoa() 
-{ 
-  const int v = SWELL_GetOSXVersion();
-  return v >= 0x1050 && v < 0x10a0; // no middleman on 10.4, or 10.10+
-}
+static BOOL useNoMiddleManCocoa() { return SWELL_GetOSXVersion() >= 0x1050; }
 
 void updateWindowCollection(NSWindow *w)
 {
@@ -245,22 +241,31 @@ static LRESULT SwellDialogDefaultWindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
     {
       if (!d(hwnd,WM_ERASEBKGND,0,0))
       {
-        const bool nommc=useNoMiddleManCocoa();
+        bool nommc=useNoMiddleManCocoa();
         NSView *cv = [[(NSView *)hwnd window] contentView];
-        const bool hwndIsOpaque = [(NSView *)hwnd isOpaque];
-        const bool isop = hwndIsOpaque || (nommc && [cv isOpaque]);
-        const bool hwndIsCV = cv == (NSView *)hwnd;
-        if (isop || hwndIsCV)
+        bool isop = [(NSView *)hwnd isOpaque] || (nommc && [cv isOpaque]);
+        if (isop || cv == (NSView *)hwnd)
         {
           PAINTSTRUCT ps;
-          if (!nommc && !hwndIsOpaque && !hwndIsCV && !(((SWELL_hwndChild*)hwnd)->m_isdirty&1))
-          {
-            // if not no-middleman, not opaque, not content view, and not directly invalidated
-            // then don't bother background drawing
-          }
-          else if (BeginPaint(hwnd,&ps))
+          if (BeginPaint(hwnd,&ps))
           {
             RECT r=ps.rcPaint;          
+            if (!nommc && !(((SWELL_hwndChild*)hwnd)->m_isdirty&1))
+            {
+              NSArray *ar = [(NSView *)hwnd subviews];
+              int x,n=[ar count];
+              for (x=0;x<n;x++)
+              {
+                NSView *v = [ar objectAtIndex:x];
+                if (![v isOpaque])
+                {
+                  NSRect f = [v frame];
+                  if (NSIntersectsRect(f,NSMakeRect(r.left,r.top,r.right-r.left,r.bottom-r.top))) break;
+                }
+              }     
+              if (x>=n) r.right=r.left; // disable drawing
+            }
+            
             if (r.right > r.left && r.bottom > r.top)
             {
               HBRUSH hbrush = (HBRUSH) d(hwnd,WM_CTLCOLORDLG,(WPARAM)ps.hdc,(LPARAM)hwnd);
@@ -892,7 +897,6 @@ static int DelegateMouseMove(NSView *view, NSEvent *theEvent)
   if (!(self = [super initWithFrame:contentRect])) return self;
 
   memset(m_access_cacheptrs,0,sizeof(m_access_cacheptrs));
-  m_allow_nomiddleman=1;
   m_isdirty=3;
   m_glctx=NULL;
   m_enabled=TRUE;
@@ -1091,7 +1095,7 @@ static int DelegateMouseMove(NSView *view, NSEvent *theEvent)
   // 10.5+ has some nice property where it goes up the hierarchy
   
 //  NSLog(@"r:%@ vr:%d v=%p tv=%p self=%p %p\n",NSStringFromRect(rect),vr,v,v2,self, [[self window] contentView]);
-  if (!useNoMiddleManCocoa() || ![self isOpaque] || [[self window] contentView] != self || [self isHiddenOrHasHiddenAncestor] || !m_allow_nomiddleman)
+  if (!useNoMiddleManCocoa() || ![self isOpaque] || [[self window] contentView] != self || [self isHiddenOrHasHiddenAncestor])
   {
     [super _recursiveDisplayRectIfNeededIgnoringOpacity:rect isVisibleRect:vr rectIsVisibleRectForView:v topView:v2];
     return;
@@ -2356,7 +2360,7 @@ OSStatus CarbonEvtHandler(EventHandlerCallRef nextHandlerRef, EventRef event, vo
 void SWELL_CarbonWndHost_SetWantAllKeys(void* carbonhost, bool want)
 {
   SWELL_hwndCarbonHost* h = (SWELL_hwndCarbonHost*)carbonhost;
-  if (h && [h isKindOfClass:[SWELL_hwndCarbonHost class]]) h->m_wantallkeys = want;
+  if (h) h->m_wantallkeys = want;
 }
 
 #endif // __LP
@@ -2365,7 +2369,7 @@ void SWELL_CarbonWndHost_SetWantAllKeys(void* carbonhost, bool want)
 
 - (id)initCarbonChild:(NSView *)parent rect:(Rect*)r composit:(bool)wantComp
 {
-  if (!(self = [super initChild:nil Parent:parent dlgProc:nil Param:0])) return self;
+  if (!(self = [super initChild:nil Parent:parent dlgProc:nil Param:NULL])) return self;
 
   m_wantallkeys=false;
   
@@ -2720,19 +2724,11 @@ HWND SWELL_GetAudioUnitCocoaView(HWND parent, AudioUnit aunit, AudioUnitCocoaVie
     return 0;
   }
   
-  [view retain];
-
+  [(NSView*)parent addSubview:view];
   NSRect bounds = [view bounds];
   r->left = r->top = 0;
   r->right = bounds.size.width;
   r->bottom = bounds.size.height;
-
-  [((NSView*)parent) setAutoresizesSubviews:NO];
-  SetWindowPos((HWND)parent,NULL, 0,0, r->right,r->bottom, SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
-
-  [(NSView*)parent addSubview:view];
-
-  [view release];
   [viewfactory release];
 
   return (HWND)view;
@@ -3183,7 +3179,7 @@ void swellRenderOptimizely(int passflags, SWELL_hwndChild *view, HDC hdc, BOOL d
         
         if (doforce||(isSwellChild && ((SWELL_hwndChild*)v)->m_isdirty)|| [v needsDisplay])
         {
-          if (isSwellChild && ((SWELL_hwndChild *)v)->m_allow_nomiddleman)
+          if (isSwellChild)
           {
             NSRect fr = [v frame];
             CGContextSaveGState(hdc->ctx);

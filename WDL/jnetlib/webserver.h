@@ -125,7 +125,7 @@ public:
   static int parseAuth(const char *auth_header, char *out, int out_len);//returns 0 on unknown auth, 1 on basic
 
 
-protected:
+private:
 
   class WS_conInst
   {

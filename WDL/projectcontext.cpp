@@ -664,7 +664,7 @@ public:
     m_bytesOut=0;
     m_errcnt=false; 
     m_tmpflag=0;
-    _rdbuf_pos = _rdbuf_valid = 0;
+    rdbuf_pos = rdbuf_valid = 0;
   }
   virtual ~ProjectStateContext_File(){ delete m_rd; delete m_wr; };
 
@@ -684,7 +684,7 @@ public:
   WDL_FileWrite *m_wr;
 
   char rdbuf[4096];
-  int _rdbuf_pos, _rdbuf_valid;
+  int rdbuf_pos, rdbuf_valid;
 
   int m_indent;
   int m_tmpflag;
@@ -694,61 +694,32 @@ public:
 
 int ProjectStateContext_File::GetLine(char *buf, int buflen)
 {
-  if (!m_rd||buflen<3) return -1;
+  if (!m_rd||buflen<2) return -1;
 
-  int rdpos = _rdbuf_pos;
-  int rdvalid = _rdbuf_valid;
-  buflen -= 2;
-
-  for (;;)
+  int i=0;
+  while (i<buflen-1)
   {
-    while (rdpos < rdvalid)
+    if (rdbuf_pos>=rdbuf_valid)
     {
-      char c=rdbuf[rdpos++];
-      switch (c)
-      {
-        case ' ': case '\r': case '\n': case '\t': break;
-        default:
-          *buf++=c;
-
-          do
-          {
-            int mxl = rdvalid - rdpos;
-            if (mxl > buflen) mxl=buflen;
-            while (mxl-->0)
-            {
-              char c2 = rdbuf[rdpos++];
-              if (c2=='\r' || c2=='\n') goto finished;
-
-              *buf++ = c2;
-              buflen--;
-            }
-            if (rdpos>=rdvalid)
-            {
-              rdpos = 0;
-              rdvalid = m_rd->Read(rdbuf, sizeof(rdbuf));
-              if (rdvalid<1) break;
-            }
-          }
-          while (buflen > 0);
-
-        finished:
-          _rdbuf_pos=rdpos;
-          _rdbuf_valid=rdvalid;
-
-          *buf=0;
-        return 0;
-      }
+      rdbuf_pos = 0;
+      rdbuf_valid = m_rd->Read(rdbuf, sizeof(rdbuf));
+      if (rdbuf_valid<1) break;
     }
+    const char c = rdbuf[rdbuf_pos++];
 
-    rdpos = 0;
-    rdvalid = m_rd->Read(rdbuf, sizeof(rdbuf));
-    if (rdvalid<1)
+    if (!i)
     {
-      buf[0]=0;
-      return -1;
+      if (c != '\r' && c != '\n' && c != ' ' && c != '\t')
+        buf[i++] = c;
+    }
+    else
+    {
+      if (c == '\r' || c == '\n') break;
+      buf[i++] = c;
     }
   }
+  buf[i]=0;
+  return buf[0] ? 0 : -1;
 }
 
 void ProjectStateContext_File::AddLine(const char *fmt, ...)
@@ -808,7 +779,7 @@ void ProjectStateContext_File::AddLine(const char *fmt, ...)
 
 ProjectStateContext *ProjectCreateFileRead(const char *fn)
 {
-  WDL_FileRead *rd = new WDL_FileRead(fn,0,65536,1);
+  WDL_FileRead *rd = new WDL_FileRead(fn);
   if (!rd || !rd->IsOpen())
   {
     delete rd;
@@ -1010,21 +981,21 @@ static int pc_base64decode(const char *src, unsigned char *dest, int destsize)
 int cfg_decode_binary(ProjectStateContext *ctx, WDL_HeapBuf *hb) // 0 on success, doesnt clear hb
 {
   int child_count=1;
+  bool comment_state=false;
   for (;;)
   {
     char linebuf[4096];
     if (ctx->GetLine(linebuf,sizeof(linebuf))) break;
 
-    const char *p = linebuf;
-    while (*p == ' ' || *p == '\t') p++;
-    if (*p == '\'' || *p == '"' || *p == '`') p++; // skip a quote if any
+    LineParser lp(comment_state);
+    if (lp.parse(linebuf)||lp.getnumtokens()<=0) continue;
 
-    if (p[0] == '<') child_count++;
-    else if (p[0] == '>') { if (child_count-- == 1) return 0; }
-    else if (child_count == 1 && p[0])
+    if (lp.gettoken_str(0)[0] == '<') child_count++;
+    else if (lp.gettoken_str(0)[0] == '>') { if (child_count-- == 1) return 0; }
+    else if (child_count == 1)
     {     
       unsigned char buf[8192];
-      int buf_l=pc_base64decode(p,buf,sizeof(buf));
+      int buf_l=pc_base64decode(lp.gettoken_str(0),buf,sizeof(buf));
       int os=hb->GetSize();
       hb->Resize(os+buf_l);
       memcpy((char *)hb->Get()+os,buf,buf_l);
@@ -1053,24 +1024,29 @@ void cfg_encode_binary(ProjectStateContext *ctx, const void *ptr, int len)
 int cfg_decode_textblock(ProjectStateContext *ctx, WDL_String *str) // 0 on success, appends to str
 {
   int child_count=1;
-  bool did_firstline=!!str->Get()[0];
+  bool comment_state=false, did_firstline=!!str->Get()[0];
   for (;;)
   {
     char linebuf[4096];
     if (ctx->GetLine(linebuf,sizeof(linebuf))) break;
 
-    const char *p = linebuf;
-    while (*p == ' ' || *p == '\t') p++;
-    if (*p == '\'' || *p == '"' || *p == '`') p++; // skip a quote if any
-
-    if (!p[0]) continue;
-    else if (p[0] == '<') child_count++; 
-    else if (p[0] == '>') { if (child_count-- == 1) return 0; }
-    else if (child_count == 1 && p[0] == '|')
+    if (!linebuf[0]) continue;
+    LineParser lp(comment_state);
+    if (!lp.parse(linebuf)&&lp.getnumtokens()>0) 
+    {
+      if (lp.gettoken_str(0)[0] == '<') { child_count++; continue; }
+      else if (lp.gettoken_str(0)[0] == '>') { if (child_count-- == 1) return 0; continue; }
+    }
+    if (child_count == 1)
     {     
-      if (!did_firstline) did_firstline=true;
-      else str->Append("\r\n");
-      str->Append(++p);
+      char *p=linebuf;
+      while (*p == ' ' || *p == '\t') p++;
+      if (*p == '|')
+      {
+        if (!did_firstline) did_firstline=true;
+        else str->Append("\r\n");
+        str->Append(++p);
+      }
     }
   }
   return -1;  
@@ -1079,28 +1055,32 @@ int cfg_decode_textblock(ProjectStateContext *ctx, WDL_String *str) // 0 on succ
 int cfg_decode_textblock(ProjectStateContext *ctx, WDL_FastString *str) // 0 on success, appends to str
 {
   int child_count=1;
-  bool did_firstline=!!str->Get()[0];
+  bool comment_state=false, did_firstline=!!str->Get()[0];
   for (;;)
   {
     char linebuf[4096];
     if (ctx->GetLine(linebuf,sizeof(linebuf))) break;
 
-    const char *p = linebuf;
-    while (*p == ' ' || *p == '\t') p++;
-    if (*p == '\'' || *p == '"' || *p == '`') p++; // skip a quote if any
-
-    if (!p[0]) continue;
-    else if (p[0] == '<') child_count++; 
-    else if (p[0] == '>') { if (child_count-- == 1) return 0; }
-    else if (child_count == 1 && p[0] == '|')
+    if (!linebuf[0]) continue;
+    LineParser lp(comment_state);
+    if (!lp.parse(linebuf)&&lp.getnumtokens()>0) 
+    {
+      if (lp.gettoken_str(0)[0] == '<') { child_count++; continue; }
+      else if (lp.gettoken_str(0)[0] == '>') { if (child_count-- == 1) return 0; continue; }
+    }
+    if (child_count == 1)
     {     
-      if (!did_firstline) did_firstline=true;
-      else str->Append("\r\n");
-      str->Append(++p);
+      char *p=linebuf;
+      while (*p == ' ' || *p == '\t') p++;
+      if (*p == '|')
+      {
+        if (!did_firstline) did_firstline=true;
+        else str->Append("\r\n");
+        str->Append(++p);
+      }
     }
   }
   return -1;  
-
 }
 
 

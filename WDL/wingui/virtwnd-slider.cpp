@@ -968,10 +968,7 @@ bool WDL_VirtualSlider::OnMouseWheel(int xpos, int ypos, int amt)
 {
   if (m_grayed) return false;
 
-  if (xpos != -100 || ypos != -100) // xpos=ypos=-100 used by virtwnd-nsaccessibility
-  {
-    if (!WDL_STYLE_AllowSliderMouseWheel()) return false;
-  }
+  if (!WDL_STYLE_AllowSliderMouseWheel()) return false;
 
   bool isVert = GetIsVert();
 	int l=amt;
