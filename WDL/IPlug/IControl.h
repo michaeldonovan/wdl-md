@@ -22,7 +22,7 @@ public:
     : mPlug(pPlug), mRECT(pR), mTargetRECT(pR), mParamIdx(paramIdx), mValue(0.0), mDefaultValue(-1.0),
       mBlend(blendMethod), mDirty(true), mHide(false), mGrayed(false), mDisablePrompt(true), mDblAsSingleClick(false),
       mClampLo(0.0), mClampHi(1.0), mMOWhenGreyed(false), mTextEntryLength(DEFAULT_TEXT_ENTRY_LEN), 
-      mValDisplayControl(0), mNameDisplayControl(0), mTooltip("") {}
+      mValDisplayControl(0), mNameDisplayControl(0), mTooltip(NULL) {}
 
   virtual ~IControl() {}
 
@@ -30,7 +30,7 @@ public:
   virtual void OnMouseUp(int x, int y, IMouseMod* pMod) {}
   virtual void OnMouseDrag(int x, int y, int dX, int dY, IMouseMod* pMod) {}
   virtual void OnMouseDblClick(int x, int y, IMouseMod* pMod);
-  virtual void OnMouseWheel(int x, int y, IMouseMod* pMod, int d) {};
+  virtual void OnMouseWheel(int x, int y, IMouseMod* pMod, int d);
   virtual bool OnKeyDown(int x, int y, int key) { return false; }
 
   // For efficiency, mouseovers/mouseouts are ignored unless you call IGraphics::HandleMouseOver.
@@ -48,18 +48,17 @@ public:
   void PromptUserInput();
   void PromptUserInput(IRECT* pTextRect);
   
-  inline void SetTooltip(const char* tooltip) { mTooltip.Set(tooltip); }
-  inline const char* GetTooltip() const { return mTooltip.Get(); }
+  inline void SetTooltip(const char* tooltip) { mTooltip = tooltip; }
+  inline const char* GetTooltip() const { return mTooltip; }
 
   int ParamIdx() { return mParamIdx; }
   IParam *GetParam() { return mPlug->GetParam(mParamIdx); }
   virtual void SetValueFromPlug(double value);
-  virtual void SetValueFromUserInput(double value);
+  void SetValueFromUserInput(double value);
   double GetValue() { return mValue; }
 
   IText* GetText() { return &mText; }
   int GetTextEntryLength() { return mTextEntryLength; }
-  void SetTextEntryLength(int len) { mTextEntryLength = len;  }
   void SetText(IText* txt) { mText = *txt; }
   IRECT* GetRECT() { return &mRECT; }       // The draw area for this control.
   IRECT* GetTargetRECT() { return &mTargetRECT; } // The mouse target area (default = draw area).
@@ -119,9 +118,6 @@ public:
   void SetAllAuxParamsFromGUI();
   int NAuxParams() { return mAuxParams.GetSize(); }
   
-  IPlugBase* GetPlug() { return mPlug; }
-  IGraphics* GetGUI() { return mPlug->GetGUI(); }
-
 protected:
   int mTextEntryLength;
   IText mText;
@@ -135,7 +131,7 @@ protected:
   IChannelBlend mBlend;
   IControl* mValDisplayControl;
   IControl* mNameDisplayControl;
-  WDL_String mTooltip;
+  const char* mTooltip;
 };
 
 enum EDirection { kVertical, kHorizontal };
@@ -274,7 +270,6 @@ public:
 
   virtual void OnMouseDown(int x, int y, IMouseMod* pMod);
   virtual void OnMouseDrag(int x, int y, int dX, int dY, IMouseMod* pMod);
-  virtual void OnMouseWheel(int x, int y, IMouseMod* pMod, int d);
 
   virtual bool Draw(IGraphics* pGraphics);
   
@@ -301,7 +296,6 @@ public:
 
   void SetGearing(double gearing) { mGearing = gearing; }
   virtual void OnMouseDrag(int x, int y, int dX, int dY, IMouseMod* pMod);
-  virtual void OnMouseWheel(int x, int y, IMouseMod* pMod, int d);
 
 protected:
   EDirection mDirection;
@@ -358,6 +352,7 @@ public:
 protected:
   IBitmap mBitmap;
 };
+
 
 // A knob that consists of a static base, a rotating mask, and a rotating top.
 // The bitmaps are assumed to be symmetrical and identical sizes.
@@ -482,6 +477,52 @@ protected:
   WDL_String mDir, mFile, mExtensions;
   EFileAction mFileAction;
   EFileSelectorState mState;
+};
+
+class IKnobMultiControlText : public IKnobMultiControl  
+{
+	
+public:
+	
+	enum EKnobMultiControlTextPosition { kTxtPosBelow, kTxtPosAbove, kTxtPosMiddle };
+	
+	IKnobMultiControlText(IPlugBase* pPlug, int x, int y, int paramIdx, IBitmap* pBitmap, IText* pText, bool showParamLabel = true, IKnobMultiControlText::EKnobMultiControlTextPosition labelPosition = kTxtPosBelow)
+	:	IKnobMultiControl(pPlug, x, y, paramIdx, pBitmap)
+	{
+		mText = *pText;
+		//mTextRECT = IRECT(mRECT.L, mRECT.B-20, mRECT.R, mRECT.B);
+		mImgRECT = IRECT(x, y, pBitmap);
+		mDisablePrompt = false;
+		mShowParamLabel = showParamLabel;
+		
+		int captionHeight = pText->mSize + 4;
+		int captionTop;
+		switch (labelPosition) {
+			case kTxtPosBelow:
+				mTextRECT = IRECT(mImgRECT.L, mImgRECT.B, mImgRECT.L+mImgRECT.W(), mImgRECT.T+mImgRECT.H()+captionHeight);
+				break;
+			case kTxtPosAbove:
+				mTextRECT = IRECT(mImgRECT.L, mImgRECT.T-captionHeight, mImgRECT.L+mImgRECT.W(), mImgRECT.T);
+				break;
+			case kTxtPosMiddle:
+				captionTop = mImgRECT.T + (mImgRECT.H()/2) - (captionHeight/2)+2;
+				mTextRECT = IRECT(mImgRECT.L, captionTop, mImgRECT.L+mImgRECT.W(), captionTop+captionHeight);
+				break;
+		}
+	}
+	
+	~IKnobMultiControlText() {}
+	
+	bool Draw(IGraphics* pGraphics);
+	void OnMouseDown(int x, int y, IMouseMod* pMod);
+	void OnMouseDblClick(int x, int y, IMouseMod* pMod);
+
+private:
+	IRECT mTextRECT, mImgRECT;
+	IBitmap mBitmap;
+	WDL_String mStr;
+	bool mShowParamLabel;
+	
 };
 
 #endif

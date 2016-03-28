@@ -105,7 +105,28 @@ void IControl::OnMouseDblClick(int x, int y, IMouseMod* pMod)
   #endif
 }
 
-#define PARAM_EDIT_W 40
+void IControl::OnMouseWheel(int x, int y, IMouseMod* pMod, int d)
+{
+  #ifdef PROTOOLS
+  if (pMod->C)
+  {
+    mValue += 0.001 * d;
+  }
+  #else
+  if (pMod->C || pMod->S)
+  {
+    mValue += 0.001 * d;
+  }
+  #endif
+  else
+  {
+    mValue += 0.01 * d;
+  }
+  
+  SetDirty();
+}
+
+#define PARAM_EDIT_W 30
 #define PARAM_EDIT_H 16
 
 void IControl::PromptUserInput()
@@ -463,27 +484,6 @@ void IFaderControl::OnMouseDrag(int x, int y, int dX, int dY, IMouseMod* pMod)
   return SnapToMouse(x, y);
 }
 
-void IFaderControl::OnMouseWheel(int x, int y, IMouseMod* pMod, int d)
-{
-#ifdef PROTOOLS
-  if (pMod->C)
-  {
-    mValue += 0.001 * d;
-  }
-#else
-  if (pMod->C || pMod->S)
-  {
-    mValue += 0.001 * d;
-  }
-#endif
-  else
-  {
-    mValue += 0.01 * d;
-  }
-  
-  SetDirty();
-}
-
 void IFaderControl::SnapToMouse(int x, int y)
 {
   if (mDirection == kVertical)
@@ -542,27 +542,6 @@ void IKnobControl::OnMouseDrag(int x, int y, int dX, int dY, IMouseMod* pMod)
   SetDirty();
 }
 
-void IKnobControl::OnMouseWheel(int x, int y, IMouseMod* pMod, int d)
-{
-#ifdef PROTOOLS
-  if (pMod->C)
-  {
-    mValue += 0.001 * d;
-  }
-#else
-  if (pMod->C || pMod->S)
-  {
-    mValue += 0.001 * d;
-  }
-#endif
-  else
-  {
-    mValue += 0.01 * d;
-  }
-  
-  SetDirty();
-}
-
 IKnobLineControl::IKnobLineControl(IPlugBase* pPlug, IRECT pR, int paramIdx,
                                    const IColor* pColor, double innerRadius, double outerRadius,
                                    double minAngle, double maxAngle, EDirection direction, double gearing)
@@ -606,6 +585,57 @@ bool IKnobMultiControl::Draw(IGraphics* pGraphics)
   i = BOUNDED(i, 1, mBitmap.N);
   return pGraphics->DrawBitmap(&mBitmap, &mRECT, i, &mBlend);
 }
+
+
+bool IKnobMultiControlText::Draw(IGraphics* pGraphics)
+{
+	IKnobMultiControl::Draw(pGraphics);
+    
+    char cStr[32];
+    mPlug->GetParam(mParamIdx)->GetDisplayForHost(cStr);
+    mStr.Set(cStr);
+	if (mShowParamLabel) {
+		mStr.Append(" ");
+		mStr.Append(mPlug->GetParam(mParamIdx)->GetLabelForHost());
+	}
+
+    if (CSTR_NOT_EMPTY(cStr)) {
+		// measure the text size
+		pGraphics->DrawIText(&mText, mStr.Get(), &mTextRECT,true);
+		// draw text
+		return pGraphics->DrawIText(&mText, mStr.Get(), &mTextRECT);
+    }
+    return true;
+}
+	
+void IKnobMultiControlText::OnMouseDown(int x, int y, IMouseMod* pMod)
+{
+	if (mTextRECT.Contains(x, y)) PromptUserInput(&mTextRECT);
+#ifdef PROTOOLS
+	else if (pMod->A) {
+		if (mDefaultValue >= 0.0) {
+			mValue = mDefaultValue;
+			SetDirty();
+		}
+	}
+#endif
+	else {
+		OnMouseDrag(x, y, 0, 0, pMod);
+	}
+}
+	
+void IKnobMultiControlText::OnMouseDblClick(int x, int y, IMouseMod* pMod)
+{
+#ifdef PROTOOLS
+	PromptUserInput(&mTextRECT);
+#else
+	if (mDefaultValue >= 0.0) {
+		mValue = mDefaultValue;
+		SetDirty();
+	}
+#endif
+}
+
 
 bool IKnobRotatingMaskControl::Draw(IGraphics* pGraphics)
 {
