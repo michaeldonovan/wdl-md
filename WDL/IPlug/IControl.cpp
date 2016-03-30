@@ -599,13 +599,13 @@ bool IKnobMultiControlText::Draw(IGraphics* pGraphics)
 		mStr.Append(mPlug->GetParam(mParamIdx)->GetLabelForHost());
 	}
 
-    if (CSTR_NOT_EMPTY(cStr)) {
+    //if (CSTR_NOT_EMPTY(cStr)) {
 		// measure the text size
 		pGraphics->DrawIText(&mText, mStr.Get(), &mTextRECT,true);
 		// draw text
 		return pGraphics->DrawIText(&mText, mStr.Get(), &mTextRECT);
-    }
-    return true;
+//    }
+  //  return true;
 }
 	
 void IKnobMultiControlText::OnMouseDown(int x, int y, IMouseMod* pMod)
