@@ -6,6 +6,9 @@
 #ifdef OS_OSX
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/glu.h>
+#include "nanovg.h"
+#include "nanovg_gl.h"
+
 //#else
 //#endif
 

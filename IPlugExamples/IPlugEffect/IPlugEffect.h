@@ -1,4 +1,4 @@
-#ifndef __IPLUGEFFECT__
+b#ifndef __IPLUGEFFECT__
 #define __IPLUGEFFECT__
 
 #include "IPlug_include_in_plug_hdr.h"

@@ -1,0 +1,576 @@
+// !$*UTF8*$!
+{
+	165906A30D0F9F3E00EA3DB0 /* testRandom */ = {
+		activeExec = 0;
+		executables = (
+			1695E72E1295ADBB00F6F3C0 /* testRandom */,
+		);
+	};
+	168AAC9C0CD0025D00F36E4B /* libgamma.a */ = {
+		activeExec = 0;
+	};
+	168AAD840CD0042400F36E4B /* libgamma{.a, .dylib} */ = {
+		activeExec = 0;
+	};
+	1693877C0FBC7EF400274B2A /* testTypes */ = {
+		activeExec = 0;
+		executables = (
+			1695E7331295ADBB00F6F3C0 /* testTypes */,
+		);
+	};
+	1695E7241295ADBB00F6F3C0 /* testAnalysis */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 1;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = testAnalysis;
+		sourceDirectories = (
+		);
+	};
+	1695E7251295ADBB00F6F3C0 /* testAudioSine */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 1;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = testAudioSine;
+		sourceDirectories = (
+		);
+	};
+	1695E7261295ADBB00F6F3C0 /* testContainers */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 1;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = testContainers;
+		sourceDirectories = (
+		);
+	};
+	1695E7271295ADBB00F6F3C0 /* testConversion */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 1;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = testConversion;
+		sourceDirectories = (
+		);
+	};
+	1695E7281295ADBB00F6F3C0 /* testDFT */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 1;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = testDFT;
+		sourceDirectories = (
+		);
+	};
+	1695E7291295ADBB00F6F3C0 /* testEnvelope */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 1;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = testEnvelope;
+		sourceDirectories = (
+		);
+	};
+	1695E72A1295ADBB00F6F3C0 /* testIpol */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 1;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = testIpol;
+		sourceDirectories = (
+		);
+	};
+	1695E72B1295ADBB00F6F3C0 /* testNode */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 1;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = testNode;
+		sourceDirectories = (
+		);
+	};
+	1695E72C1295ADBB00F6F3C0 /* testNoise */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 1;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = testNoise;
+		sourceDirectories = (
+		);
+	};
+	1695E72D1295ADBB00F6F3C0 /* testOscillator */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 1;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = testOscillator;
+		sourceDirectories = (
+		);
+	};
+	1695E72E1295ADBB00F6F3C0 /* testRandom */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 1;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = testRandom;
+		sourceDirectories = (
+		);
+	};
+	1695E72F1295ADBB00F6F3C0 /* testRecurrenceMap */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 1;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = testRecurrenceMap;
+		sourceDirectories = (
+		);
+	};
+	1695E7301295ADBB00F6F3C0 /* testScalar */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 1;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = testScalar;
+		sourceDirectories = (
+		);
+	};
+	1695E7311295ADBB00F6F3C0 /* testTable */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 1;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = testTable;
+		sourceDirectories = (
+		);
+	};
+	1695E7321295ADBB00F6F3C0 /* testTimer */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 1;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = testTimer;
+		sourceDirectories = (
+		);
+	};
+	1695E7331295ADBB00F6F3C0 /* testTypes */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 1;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = testTypes;
+		sourceDirectories = (
+		);
+	};
+	1695E7341295ADBB00F6F3C0 /* unitTests */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 1;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = unitTests;
+		sourceDirectories = (
+		);
+	};
+	1695E7401295ADD000F6F3C0 /* Source Control */ = {
+		isa = PBXSourceControlManager;
+		fallbackIsa = XCSourceControlManager;
+		isSCMEnabled = 0;
+		scmConfiguration = {
+		};
+	};
+	1695E7411295ADD000F6F3C0 /* Code sense */ = {
+		isa = PBXCodeSenseManager;
+		indexTemplatePath = "";
+	};
+	16AEEFBD0D3C41AA00AFD3A4 /* testOscillator */ = {
+		activeExec = 0;
+		executables = (
+			1695E72D1295ADBB00F6F3C0 /* testOscillator */,
+		);
+	};
+	16BC61B60FFC896A00AF1B29 /* unitTests */ = {
+		activeExec = 0;
+		executables = (
+			1695E7341295ADBB00F6F3C0 /* unitTests */,
+		);
+	};
+	16C872990EFA14EA00449449 /* testNode */ = {
+		activeExec = 0;
+		executables = (
+			1695E72B1295ADBB00F6F3C0 /* testNode */,
+		);
+	};
+	16C872A60EFA151600449449 /* testNoise */ = {
+		activeExec = 0;
+		executables = (
+			1695E72C1295ADBB00F6F3C0 /* testNoise */,
+		);
+	};
+	16D4286B0DC8030500BF3144 /* testAudioSine */ = {
+		activeExec = 0;
+		executables = (
+			1695E7251295ADBB00F6F3C0 /* testAudioSine */,
+		);
+	};
+	16E2B28B0D3AD1F8003E39D1 /* testIpol */ = {
+		activeExec = 0;
+		executables = (
+			1695E72A1295ADBB00F6F3C0 /* testIpol */,
+		);
+	};
+	16EACA900D15BE150044B3CB /* testConversion */ = {
+		activeExec = 0;
+		executables = (
+			1695E7271295ADBB00F6F3C0 /* testConversion */,
+		);
+	};
+	16EACAA80D15BE960044B3CB /* testTimer */ = {
+		activeExec = 0;
+		executables = (
+			1695E7321295ADBB00F6F3C0 /* testTimer */,
+		);
+	};
+	16F76AD50D11E01C001C3DCA /* testTable */ = {
+		activeExec = 0;
+		executables = (
+			1695E7311295ADBB00F6F3C0 /* testTable */,
+		);
+	};
+	16F76AFD0D11E23D001C3DCA /* testAnalysis */ = {
+		activeExec = 0;
+		executables = (
+			1695E7241295ADBB00F6F3C0 /* testAnalysis */,
+		);
+	};
+	16F76B130D11E34A001C3DCA /* testRecurrenceMap */ = {
+		activeExec = 0;
+		executables = (
+			1695E72F1295ADBB00F6F3C0 /* testRecurrenceMap */,
+		);
+	};
+	16F76C730D12058C001C3DCA /* testEnvelope */ = {
+		activeExec = 0;
+		executables = (
+			1695E7291295ADBB00F6F3C0 /* testEnvelope */,
+		);
+	};
+	16F9A1840D0DB63E00721CC7 /* testScalar */ = {
+		activeExec = 0;
+		executables = (
+			1695E7301295ADBB00F6F3C0 /* testScalar */,
+		);
+	};
+	16F9A1B40D0DB74000721CC7 /* testContainers */ = {
+		activeExec = 0;
+		executables = (
+			1695E7261295ADBB00F6F3C0 /* testContainers */,
+		);
+	};
+	16FC1BBC0DED18E000B9AD13 /* testDFT */ = {
+		activeExec = 0;
+		executables = (
+			1695E7281295ADBB00F6F3C0 /* testDFT */,
+		);
+	};
+	7EB463D00825DC05002E1A73 /* Project object */ = {
+		activeBuildConfigurationName = Development;
+		activeExecutable = 1695E7251295ADBB00F6F3C0 /* testAudioSine */;
+		activeTarget = 16D4286B0DC8030500BF3144 /* testAudioSine */;
+		addToTargets = (
+			16F76AFD0D11E23D001C3DCA /* testAnalysis */,
+			16D4286B0DC8030500BF3144 /* testAudioSine */,
+			168AAC9C0CD0025D00F36E4B /* libgamma.a */,
+			C0F9EF670BB059670069B343 /* libgamma.dylib */,
+		);
+		codeSenseManager = 1695E7411295ADD000F6F3C0 /* Code sense */;
+		executables = (
+			1695E7241295ADBB00F6F3C0 /* testAnalysis */,
+			1695E7251295ADBB00F6F3C0 /* testAudioSine */,
+			1695E7261295ADBB00F6F3C0 /* testContainers */,
+			1695E7271295ADBB00F6F3C0 /* testConversion */,
+			1695E7281295ADBB00F6F3C0 /* testDFT */,
+			1695E7291295ADBB00F6F3C0 /* testEnvelope */,
+			1695E72A1295ADBB00F6F3C0 /* testIpol */,
+			1695E72B1295ADBB00F6F3C0 /* testNode */,
+			1695E72C1295ADBB00F6F3C0 /* testNoise */,
+			1695E72D1295ADBB00F6F3C0 /* testOscillator */,
+			1695E72E1295ADBB00F6F3C0 /* testRandom */,
+			1695E72F1295ADBB00F6F3C0 /* testRecurrenceMap */,
+			1695E7301295ADBB00F6F3C0 /* testScalar */,
+			1695E7311295ADBB00F6F3C0 /* testTable */,
+			1695E7321295ADBB00F6F3C0 /* testTimer */,
+			1695E7331295ADBB00F6F3C0 /* testTypes */,
+			1695E7341295ADBB00F6F3C0 /* unitTests */,
+		);
+		perUserDictionary = {
+			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					495,
+					20,
+					48.16259765625,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 311799227;
+			PBXWorkspaceStateSaveDate = 311799227;
+		};
+		sourceControlManager = 1695E7401295ADD000F6F3C0 /* Source Control */;
+		userBuildSettings = {
+		};
+	};
+	C0F9EF670BB059670069B343 /* libgamma.dylib */ = {
+		activeExec = 0;
+	};
+}

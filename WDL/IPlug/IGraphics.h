@@ -5,6 +5,7 @@
 #include "IPopupMenu.h"
 #include "IControl.h"
 #include "../lice/lice.h"
+#include "../Cairo/include/cairo.h"
 
 // Specialty stuff for calling in to Reaper for Lice functionality.
 #ifdef REAPER_SPECIAL

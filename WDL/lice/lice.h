@@ -68,12 +68,35 @@ typedef unsigned char LICE_pixel_chan;
 #define LICE_PIXEL_R 2
 #define LICE_PIXEL_A 3
 
+//#elif defined(__APPLE__)
+//// start apple
+//#define LICE_PIXEL_A 0
+//#define LICE_PIXEL_R 1
+//#define LICE_PIXEL_G 2
+//#define LICE_PIXEL_B 3
+//
+//#ifdef __ppc__ // same memory format, different endian
+//
+//#define LICE_RGBA(r,g,b,a) (((b)&0xff)|(((g)&0xff)<<8)|(((r)&0xff)<<16)|(((a)&0xff)<<24))
+//#define LICE_GETB(v) ((v)&0xff)
+//#define LICE_GETG(v) (((v)>>8)&0xff)
+//#define LICE_GETR(v) (((v)>>16)&0xff)
+//#define LICE_GETA(v) (((v)>>24)&0xff)
+//
+//#else
+//
+//#define LICE_RGBA(r,g,b,a) (((a)&0xff)|(((r)&0xff)<<8)|(((g)&0xff)<<16)|(((b)&0xff)<<24))
+//#define LICE_GETA(v) ((v)&0xff)
+//#define LICE_GETR(v) (((v)>>8)&0xff)
+//#define LICE_GETG(v) (((v)>>16)&0xff)
+//#define LICE_GETB(v) (((v)>>24)&0xff)
+
 #elif defined(__APPLE__)
 // start apple
-#define LICE_PIXEL_A 0
-#define LICE_PIXEL_R 1
-#define LICE_PIXEL_G 2
-#define LICE_PIXEL_B 3
+#define LICE_PIXEL_A 3
+#define LICE_PIXEL_R 2
+#define LICE_PIXEL_G 1
+#define LICE_PIXEL_B 0
 
 #ifdef __ppc__ // same memory format, different endian
 
@@ -85,11 +108,11 @@ typedef unsigned char LICE_pixel_chan;
 
 #else
 
-#define LICE_RGBA(r,g,b,a) (((a)&0xff)|(((r)&0xff)<<8)|(((g)&0xff)<<16)|(((b)&0xff)<<24))
-#define LICE_GETA(v) ((v)&0xff)
-#define LICE_GETR(v) (((v)>>8)&0xff)
-#define LICE_GETG(v) (((v)>>16)&0xff)
-#define LICE_GETB(v) (((v)>>24)&0xff)
+#define LICE_RGBA(r,g,b,a) (((b)&0xff)|(((g)&0xff)<<8)|(((r)&0xff)<<16)|(((a)&0xff)<<24))
+#define LICE_GETB(v) ((v)&0xff)
+#define LICE_GETG(v) (((v)>>8)&0xff)
+#define LICE_GETR(v) (((v)>>16)&0xff)
+#define LICE_GETA(v) (((v)>>24)&0xff)
 
 #endif
 

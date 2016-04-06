@@ -650,7 +650,7 @@
 		52E41D7E0D14C2D100A0943B /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = /System/Library/Frameworks/AudioUnit.framework; sourceTree = "<absolute>"; };
 		52E41D920D14C2D600A0943B /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = /System/Library/Frameworks/AudioToolbox.framework; sourceTree = "<absolute>"; };
 		52FBBED00D0CF139001C8B8A /* IPlugDistortion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.cpp.cpp; path = IPlugDistortion.cpp; sourceTree = "<group>"; tabWidth = 2; usesTabs = 0; };
-		52FBBED20D0CF13D001C8B8A /* IPlugDistortion.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.c.h; path = IPlugDistortion.h; sourceTree = "<group>"; tabWidth = 2; usesTabs = 0; };
+		52FBBED20D0CF13D001C8B8A /* IPlugDistortion.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 3; lastKnownFileType = sourcecode.c.h; path = IPlugDistortion.h; sourceTree = "<group>"; tabWidth = 2; usesTabs = 0; };
 		52FBBED30D0CF143001C8B8A /* resource.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.c.h; path = resource.h; sourceTree = "<group>"; tabWidth = 2; usesTabs = 0; };
 		D2F7E65807B2D6F200F64583 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
@@ -1552,8 +1552,8 @@
 		089C1669FE841209C02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0620;
 				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 0620;
 			};
 			buildConfigurationList = 1DEB913E08733D840010E9CD /* Build configuration list for PBXProject "IPlugDistortion" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -2059,10 +2059,10 @@
 				PREBINDING = NO;
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRODUCT_NAME = "$(BINARY_NAME)";
-				SYMROOT = "build-mac";
 				SDKROOT = "$(BASE_SDK)";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = NO;
+				SYMROOT = "build-mac";
 				VALID_ARCHS = "i386 x86_64";
 				WRAPPER_EXTENSION = "";
 			};
@@ -2108,9 +2108,9 @@
 				PREBINDING = NO;
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRODUCT_NAME = "$(BINARY_NAME)";
-				SYMROOT = "build-mac";
 				SDKROOT = "$(BASE_SDK)";
 				SKIP_INSTALL = NO;
+				SYMROOT = "build-mac";
 				VALID_ARCHS = "i386 x86_64";
 				WRAPPER_EXTENSION = "";
 			};
@@ -2541,8 +2541,8 @@
 					"$(ADDITIONAL_LIBRARY_PATHS)",
 					"$(AAX_SDK)/Libs/Release",
 				);
-				PREBINDING = YES;
 				MACOSX_DEPLOYMENT_TARGET = "$(DEPLOYMENT_TARGET)";
+				PREBINDING = YES;
 				SDKROOT = "$(BASE_SDK)";
 				SKIP_INSTALL = NO;
 				WARNING_CFLAGS = (
@@ -2714,9 +2714,9 @@
 				PREBINDING = NO;
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = NO;
 				PRODUCT_NAME = "$(BINARY_NAME)";
-				SYMROOT = "build-mac";
 				SDKROOT = "$(BASE_SDK)";
 				SKIP_INSTALL = NO;
+				SYMROOT = "build-mac";
 				VALID_ARCHS = "i386 x86_64";
 				WRAPPER_EXTENSION = "";
 			};
