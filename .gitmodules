@@ -1,0 +1,3 @@
+[submodule "WDL/IPlug/DSP/VAStateVariableFilter"]
+	path = WDL/IPlug/DSP/VAStateVariableFilter
+	url = git://github.com/michaeldonovan/VAStateVariableFilter
