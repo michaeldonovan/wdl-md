@@ -930,16 +930,10 @@ void IFaderControlText::setCaptionOffset(int offset){
 
 
 
-ICairoPlotControl::ICairoPlotControl(IPlugBase* pPlug, IRECT pR, int paramIdx, IColor* fillColor, IColor* lineColor, bool fillEnable) : IControl(pPlug, pR), mColorFill(fillColor), mColorLine(lineColor), mFill(fillEnable), mRange(1), mLineWeight(2.)
+ICairoPlotControl::ICairoPlotControl(IPlugBase* pPlug, IRECT pR, int paramIdx, IColor* fillColor, IColor* lineColor, bool fillEnable) : IControl(pPlug, pR), mColorFill(fillColor), mColorLine(lineColor), mFill(fillEnable), mRange(1), mLineWeight(2.), mRetina(false)
 {
-#ifndef IPLUG_RETINA_SUPPORT
     mWidth = mRECT.W();
     mHeight = mRECT.H();
-#else
-    mWidth = mRECT.W() * 2;
-    mHeight = mRECT.H() * 2;
-#endif
-    
     
     mVals = new valarray<double>(0., mWidth);
     
@@ -1009,8 +1003,30 @@ void ICairoPlotControl::plotVals(valarray<double>* vals, bool normalize){
     SetDirty(true);
 }
 
+ void ICairoPlotControl::checkChangeDPI(IGraphics* pGraphics){
+    if(pGraphics->IsRetina() != mRetina){   //Check if Retina state has changed
+        mRetina = pGraphics->IsRetina();    //Update retina state
+        if(mRetina){
+            mWidth = mRECT.W() * 2;
+            mHeight = mRECT.H() * 2;
+        }
+        else{
+            mWidth = mRECT.W();
+            mHeight = mRECT.H();
+        }
+        
+        cairo_surface_destroy(surface);
+        cairo_destroy(cr);
+        
+        surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, mWidth, mHeight);
+        cr = cairo_create(surface);
+    }
+}
+
 bool ICairoPlotControl::Draw(IGraphics* pGraphics){
     double mSpacing = (double)mWidth / mVals->size()  ;
+    
+    checkChangeDPI(pGraphics);
     
     cairo_save(cr);
     cairo_set_source_rgba(cr, 0, 0, 0, 0);
@@ -1018,13 +1034,17 @@ bool ICairoPlotControl::Draw(IGraphics* pGraphics){
     cairo_paint(cr);
     cairo_restore(cr);
     
+
+    
     //surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, mWidth, mHeight);
     //cr = cairo_create(surface);
-#ifdef IPLUG_RETINA_SUPPORT
-    cairo_set_line_width(cr, mLineWeight * 2);
-#else
-    cairo_set_line_width(cr, mLineWeight);
-#endif
+    if(mRetina){
+        cairo_set_line_width(cr, mLineWeight * 2);
+    }
+    else{
+        cairo_set_line_width(cr, mLineWeight);
+    }
+
     //Starting point in bottom left corner.
     cairo_move_to(cr, 0, mHeight);
     
@@ -1072,13 +1092,7 @@ bool ICairoPlotControl::Draw(IGraphics* pGraphics){
     result = IBitmap(&WrapperBitmap, WrapperBitmap.getWidth(), WrapperBitmap.getHeight());
     
 #else
-    if(!pGraphics->IsRetina()){
-        IBitmap result2x(&WrapperBitmap, &WrapperBitmap, WrapperBitmap.getWidth(), WrapperBitmap.getHeight());
-        result = pGraphics->ScaleBitmap(&result2x, mRECT.W(), mRECT.H());
-    }
-    else{
-        result = IBitmap(&WrapperBitmap, &WrapperBitmap, WrapperBitmap.getWidth(), WrapperBitmap.getHeight());
-    }
+    result = IBitmap(&WrapperBitmap, &WrapperBitmap, WrapperBitmap.getWidth(), WrapperBitmap.getHeight());
 #endif
     return pGraphics->DrawBitmap(&result, &this->mRECT);
     
@@ -1110,7 +1124,7 @@ inline double ICairoPlotControl::percentToCoordinates(double value) {
 
 ILevelPlotControl::ILevelPlotControl(IPlugBase* pPlug, IRECT pR, IColor* fillColor, IColor* lineColor, double timeScale, bool fillEnable, int paramIdx) : ICairoPlotControl(pPlug, pR, paramIdx, fillColor, lineColor, fillEnable), mTimeScale(timeScale), mBufferLength(0.), mYRange(-32), mStroke(true), mHeadroom(2), mReverseFill(false), mGradientFill(false)
 {
-    
+    mRes = kHighRes;
     mXRes = mWidth/2.;
     mDrawVals = new valarray<double>(mHeight, mXRes);
     mBuffer = new valarray<double>(0., mTimeScale * mPlug->GetSampleRate() / (double)mXRes);
@@ -1129,7 +1143,8 @@ void ILevelPlotControl::setReverseFill(bool rev){
 }
 
 void ILevelPlotControl::setResolution(int res){
-    switch (res) {
+    mRes = res;
+    switch (mRes) {
         case kLowRes:
             mXRes = mWidth / 8.;
             break;
@@ -1207,8 +1222,31 @@ void ILevelPlotControl::process(double sample){
     }
 }
 
+void ILevelPlotControl::checkChangeDPI(IGraphics* pGraphics){
+    if(pGraphics->IsRetina() != mRetina){   //Check if Retina state has changed
+        mRetina = pGraphics->IsRetina();    //Update retina state
+        if(mRetina){
+            mWidth = mRECT.W() * 2;
+            mHeight = mRECT.H() * 2;
+        }
+        else{
+            mWidth = mRECT.W();
+            mHeight = mRECT.H();
+        }
+        
+        setResolution(mRes);
+        
+        cairo_surface_destroy(surface);
+        cairo_destroy(cr);
+        
+        surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, mWidth, mHeight);
+        cr = cairo_create(surface);
+    }
+}
 
 bool ILevelPlotControl::Draw(IGraphics* pGraphics){
+    
+    checkChangeDPI(pGraphics);
     
     cairo_save(cr);
     cairo_set_source_rgba(cr, 0, 0, 0, 0);
@@ -1219,11 +1257,12 @@ bool ILevelPlotControl::Draw(IGraphics* pGraphics){
     //surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, mWidth, mHeight);
     //cr = cairo_create(surface);
     
-#ifdef IPLUG_RETINA_SUPPORT
-    cairo_set_line_width(cr, mLineWeight * 2);
-#else
-    cairo_set_line_width(cr, mLineWeight);
-#endif
+    if(mRetina){
+        cairo_set_line_width(cr, mLineWeight * 2);
+    }
+    else{
+        cairo_set_line_width(cr, mLineWeight);
+    }
     
     //        if(mGridLines){
     //            drawDBLines(cr);
@@ -1313,15 +1352,8 @@ bool ILevelPlotControl::Draw(IGraphics* pGraphics){
     IBitmap result;
 #ifndef IPLUG_RETINA_SUPPORT
     result = IBitmap(&WrapperBitmap, WrapperBitmap.getWidth(), WrapperBitmap.getHeight());
-    
 #else
-    if(!pGraphics->IsRetina()){
-        IBitmap result2x(&WrapperBitmap, &WrapperBitmap, WrapperBitmap.getWidth(), WrapperBitmap.getHeight());
-        result = pGraphics->ScaleBitmap(&result2x, mRECT.W(), mRECT.H());
-    }
-    else{
-        result = IBitmap(&WrapperBitmap, &WrapperBitmap, WrapperBitmap.getWidth(), WrapperBitmap.getHeight());
-    }
+    result = IBitmap(&WrapperBitmap, &WrapperBitmap, WrapperBitmap.getWidth(), WrapperBitmap.getHeight());
 #endif
     return pGraphics->DrawBitmap(&result, &this->mRECT);
 }
@@ -1386,7 +1418,6 @@ void IGRPlotControl::setResolution(int res){
     mBufferLength = 0;
     
     mSpacing = mWidth / mXRes;
-    
 }
 
 void IGRPlotControl::setYRange(int yRangeDB){
@@ -1524,7 +1555,6 @@ bool IGRPlotControl::Draw(IGraphics* pGraphics){
     ////////////////////////////////////////////////////////////////////////////////POST
     
     
-    ////////////////////////////////////////////////////////////////////////////////POST
     
     //Starting point in top left corner.
     cairo_move_to(cr, -2, -2);
@@ -1563,11 +1593,12 @@ bool IGRPlotControl::Draw(IGraphics* pGraphics){
     cairo_append_path(cr, pathPost);
     cairo_set_source_rgba(cr, mColorLine.R, mColorLine.G, mColorLine.B, mColorLine.A);
     
-#ifdef IPLUG_RETINA_SUPPORT
-    cairo_set_line_width(cr, mLineWeight * 2);
-#else
-    cairo_set_line_width(cr, mLineWeight);
-#endif
+    if(mRetina){
+        cairo_set_line_width(cr, mLineWeight * 2);
+    }
+    else{
+        cairo_set_line_width(cr, mLineWeight);
+    }
     cairo_stroke(cr);
     
     cairo_append_path(cr, pathGR);
@@ -1575,11 +1606,12 @@ bool IGRPlotControl::Draw(IGraphics* pGraphics){
     cairo_fill(cr);
     cairo_append_path(cr, pathGR);
     cairo_set_source_rgba(cr, mGRLineColor.R, mGRLineColor.G, mGRLineColor.B, mGRLineColor.A);
-#ifdef IPLUG_RETINA_SUPPORT
-    cairo_set_line_width(cr, 3);
-#else
-    cairo_set_line_width(cr, 1.5);
-#endif
+    if(mRetina){
+        cairo_set_line_width(cr, 3);
+    }
+    else{
+        cairo_set_line_width(cr, 1.5);
+    }
     cairo_stroke(cr);
     
     cairo_path_destroy(pathClip);
@@ -1600,13 +1632,7 @@ bool IGRPlotControl::Draw(IGraphics* pGraphics){
     result = IBitmap(&WrapperBitmap, WrapperBitmap.getWidth(), WrapperBitmap.getHeight());
     
 #else
-    if(!pGraphics->IsRetina()){
-        IBitmap result2x(&WrapperBitmap, &WrapperBitmap, WrapperBitmap.getWidth(), WrapperBitmap.getHeight());
-        result = pGraphics->ScaleBitmap(&result2x, mRECT.W(), mRECT.H());
-    }
-    else{
-        result = IBitmap(&WrapperBitmap, &WrapperBitmap, WrapperBitmap.getWidth(), WrapperBitmap.getHeight());
-    }
+    result = IBitmap(&WrapperBitmap, &WrapperBitmap, WrapperBitmap.getWidth(), WrapperBitmap.getHeight());
 #endif
     return pGraphics->DrawBitmap(&result, &this->mRECT);
 }
@@ -1638,6 +1664,8 @@ void ICompressorPlotControl::calc(){
 
 bool ICompressorPlotControl::Draw(IGraphics* pGraphics){
     
+    checkChangeDPI(pGraphics);
+    
     cairo_save(cr);
     cairo_set_source_rgba(cr, 0, 0, 0, 0);
     cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
@@ -1647,11 +1675,12 @@ bool ICompressorPlotControl::Draw(IGraphics* pGraphics){
     //surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, mWidth, mHeight);
     //cr = cairo_create(surface);
     
-#ifdef IPLUG_RETINA_SUPPORT
-    cairo_set_line_width(cr, mLineWeight * 2);
-#else
-    cairo_set_line_width(cr, mLineWeight);
-#endif
+    if(mRetina){
+        cairo_set_line_width(cr, mLineWeight * 2);
+    }
+    else{
+        cairo_set_line_width(cr, mLineWeight);
+    }
     
     //fill background
     cairo_set_source_rgba(cr, mColorFill.R, mColorFill.G, mColorFill.B, mColorFill.A);
@@ -1682,19 +1711,12 @@ bool ICompressorPlotControl::Draw(IGraphics* pGraphics){
     LICE_WrapperBitmap WrapperBitmap = LICE_WrapperBitmap(data, mWidth, mHeight, mWidth, false);
     
     //Render
-    //}
+    //
     IBitmap result;
 #ifndef IPLUG_RETINA_SUPPORT
     result = IBitmap(&WrapperBitmap, WrapperBitmap.getWidth(), WrapperBitmap.getHeight());
-    
 #else
-    if(!pGraphics->IsRetina()){
-        IBitmap result2x(&WrapperBitmap, &WrapperBitmap, WrapperBitmap.getWidth(), WrapperBitmap.getHeight());
-        result = pGraphics->ScaleBitmap(&result2x, mRECT.W(), mRECT.H());
-    }
-    else{
-        result = IBitmap(&WrapperBitmap, &WrapperBitmap, WrapperBitmap.getWidth(), WrapperBitmap.getHeight());
-    }
+    result = IBitmap(&WrapperBitmap, &WrapperBitmap, WrapperBitmap.getWidth(), WrapperBitmap.getHeight());
 #endif
     return pGraphics->DrawBitmap(&result, &this->mRECT);
 }
@@ -1708,6 +1730,8 @@ IThresholdPlotControl::IThresholdPlotControl(IPlugBase* pPlug, IRECT pR, int par
 
 bool IThresholdPlotControl::Draw(IGraphics* pGraphics){
     
+    checkChangeDPI(pGraphics);
+    
     cairo_save(cr);
     cairo_set_source_rgba(cr, 0, 0, 0, 0);
     cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
@@ -1716,16 +1740,23 @@ bool IThresholdPlotControl::Draw(IGraphics* pGraphics){
     
     //surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, mWidth, mHeight);
     //cr = cairo_create(surface);
-    
-    cairo_set_line_width(cr, mLineWeight);
-    
-    cairo_set_source_rgba(cr, mColorLine.R, mColorLine.G, mColorLine.B, mColorLine.A);
-    
     double dashes[] = {6.0,  /* ink */
         3.0,  /* skip */
         6.0,  /* ink */
         3.0   /* skip*/
     };
+    
+    if(mRetina){
+        cairo_set_line_width(cr, mLineWeight * 2);
+        for(int i=0; i<4; i++) dashes[i] *= 2;
+    }
+    else{
+        cairo_set_line_width(cr, mLineWeight);
+    }
+    
+    cairo_set_source_rgba(cr, mColorLine.R, mColorLine.G, mColorLine.B, mColorLine.A);
+    
+
     int    ndash  = sizeof (dashes)/sizeof(dashes[0]);
     double offset = -5.0;
     

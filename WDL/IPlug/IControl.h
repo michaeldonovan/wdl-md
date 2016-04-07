@@ -666,7 +666,7 @@ public:
      *
      *  @param pGraphics Pointer to IGraphics
      *
-     *  @return True if drawm
+     *  @return True if drawn
      */
     bool Draw(IGraphics* pGraphics);
     
@@ -687,6 +687,17 @@ protected:
     valarray<double>* mVals;
     cairo_surface_t *surface;
     cairo_t *cr;
+    bool mRetina;
+    
+    
+    
+    /**
+     *  Checks for changes in DPI state of display, updates cairo graphics context accordingly
+     *
+     *  @param pGraphics A pointer to IGraphics
+     */
+    virtual void checkChangeDPI(IGraphics* pGraphics);
+
     
     
     /**
@@ -808,9 +819,17 @@ public:
     
 protected:
     double mTimeScale;
-    int mBufferLength, mXRes, mSpacing, mYRange, mHeadroom;
+    int mBufferLength, mXRes, mRes, mSpacing, mYRange, mHeadroom;
     valarray<double> *mBuffer, *mDrawVals;
     bool mStroke, mReverseFill, mGradientFill;
+    
+    /**
+     *  Checks for changes in DPI state of display, updates cairo graphics context accordingly
+     *
+     *  @param pGraphics A pointer to IGraphics
+     */
+    virtual void checkChangeDPI(IGraphics* pGraphics);
+
 };
 
 
@@ -849,6 +868,8 @@ protected:
     envFollower mEnvPre, mEnvPost, mEnvGR;
     
     CColor mPreFillColor, mGRLineColor, mGRFillColor;
+    
+    
 };
 
 
