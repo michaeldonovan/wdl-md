@@ -1003,7 +1003,8 @@ void ICairoPlotControl::plotVals(valarray<double>* vals, bool normalize){
     SetDirty(true);
 }
 
- void ICairoPlotControl::checkChangeDPI(IGraphics* pGraphics){
+void ICairoPlotControl::checkChangeDPI(IGraphics* pGraphics){
+#ifdef IPLUG_RETINA_SUPPORT
     if(pGraphics->IsRetina() != mRetina){   //Check if Retina state has changed
         mRetina = pGraphics->IsRetina();    //Update retina state
         if(mRetina){
@@ -1014,13 +1015,18 @@ void ICairoPlotControl::plotVals(valarray<double>* vals, bool normalize){
             mWidth = mRECT.W();
             mHeight = mRECT.H();
         }
-        
-        cairo_surface_destroy(surface);
-        cairo_destroy(cr);
-        
-        surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, mWidth, mHeight);
-        cr = cairo_create(surface);
     }
+#else
+    mWidth = mRECT.W();
+    mHeight = mRECT.H();
+#endif
+    
+    cairo_surface_destroy(surface);
+    cairo_destroy(cr);
+    
+    surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, mWidth, mHeight);
+    cr = cairo_create(surface);
+    
 }
 
 bool ICairoPlotControl::Draw(IGraphics* pGraphics){
@@ -1223,6 +1229,7 @@ void ILevelPlotControl::process(double sample){
 }
 
 void ILevelPlotControl::checkChangeDPI(IGraphics* pGraphics){
+#ifdef IPLUG_RETINA_SUPPORT
     if(pGraphics->IsRetina() != mRetina){   //Check if Retina state has changed
         mRetina = pGraphics->IsRetina();    //Update retina state
         if(mRetina){
@@ -1242,12 +1249,13 @@ void ILevelPlotControl::checkChangeDPI(IGraphics* pGraphics){
         surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, mWidth, mHeight);
         cr = cairo_create(surface);
     }
+#endif
 }
 
 bool ILevelPlotControl::Draw(IGraphics* pGraphics){
-    
+#ifdef IPLUG_RETINA_SUPPORT
     checkChangeDPI(pGraphics);
-    
+#endif
     cairo_save(cr);
     cairo_set_source_rgba(cr, 0, 0, 0, 0);
     cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
@@ -1299,7 +1307,7 @@ bool ILevelPlotControl::Draw(IGraphics* pGraphics){
         if(mGradientFill){
             cairo_pattern_t* grad = cairo_pattern_create_linear(0, 0, 0, mHeight);
             
-            cairo_pattern_add_color_stop_rgba(grad, .75, mColorFill.R, mColorFill.G, mColorFill.B, mColorFill.A);
+            cairo_pattern_add_color_stop_rgba(grad, .5, mColorFill.R, mColorFill.G, mColorFill.B, mColorFill.A);
             cairo_pattern_add_color_stop_rgba(grad, 1, mColorFill.R, mColorFill.G, mColorFill.B, .3);
             
             cairo_set_source(cr, grad);
@@ -1360,7 +1368,7 @@ bool ILevelPlotControl::Draw(IGraphics* pGraphics){
 
 
 
-IGRPlotControl::IGRPlotControl(IPlugBase* pPlug, IRECT pR, int paramIdx, IColor* preFillColor, IColor* postFillColor, IColor* postLineColor, IColor* GRFillColor, IColor* GRLineColor, double timeScale) : ICairoPlotControl(pPlug, pR, paramIdx, postFillColor, postLineColor, true), mTimeScale(timeScale), mBufferLength(0.), mYRange(-32), mHeadroom(2), sr(mPlug->GetSampleRate()), mPreFillColor(preFillColor), mGRFillColor(GRFillColor), mGRLineColor(GRLineColor)
+IGRPlotControl::IGRPlotControl(IPlugBase* pPlug, IRECT pR, int paramIdx, IColor* preFillColor, IColor* postFillColor, IColor* postLineColor, IColor* GRFillColor, IColor* GRLineColor, double timeScale) : ICairoPlotControl(pPlug, pR, paramIdx, postFillColor, postLineColor, true), mTimeScale(timeScale), mBufferLength(0.), mYRange(-32), mHeadroom(2), sr(mPlug->GetSampleRate()), mPreFillColor(preFillColor), mGRFillColor(GRFillColor), mGRLineColor(GRLineColor), mRes(2.), mGradientFill(true)
 {
     mXRes = mWidth/2.;
     mDrawValsPre = new valarray<double>(mHeight, mXRes);
@@ -1369,11 +1377,8 @@ IGRPlotControl::IGRPlotControl(IPlugBase* pPlug, IRECT pR, int paramIdx, IColor*
     
     mBufferPre = new valarray<double>(0., mTimeScale * sr / (double)mXRes);
     mBufferPost = new valarray<double>(0., mTimeScale * sr / (double)mXRes);
-    
-    mEnvPre.init(compressor::kPeak, 0, 75, 75, sr);
-    mEnvPost.init(compressor::kPeak, 0, 75, 75, sr);
-    mEnvGR.init(compressor::kPeak, 0, 75, 85, sr);
-    
+    mBufferGR = new valarray<double>(-2, mTimeScale * sr / (double)mXRes);
+
     setResolution(kHighRes);
     setLineWeight(2.);
 }
@@ -1389,7 +1394,8 @@ IGRPlotControl::~IGRPlotControl(){
 
 
 void IGRPlotControl::setResolution(int res){
-    switch (res) {
+    mRes = res;
+    switch (mRes) {
         case kLowRes:
             mXRes = mWidth / 8.;
             break;
@@ -1409,11 +1415,17 @@ void IGRPlotControl::setResolution(int res){
             mXRes = mWidth / 2.;
             break;
     }
+    
+    if(mRetina)
+        mXRes /= 2;
+    
     mBufferPre->resize(mTimeScale * sr / (double)mXRes, -48.);
     mBufferPost->resize(mTimeScale * sr / (double)mXRes, -48.);
+    mBufferGR->resize(mTimeScale * sr / (double)mXRes, 0);
+
     mDrawValsPre->resize(mXRes, mHeight);
     mDrawValsPost->resize(mXRes, mHeight);
-    mDrawValsGR->resize(mXRes, mHeight);
+    mDrawValsGR->resize(mXRes, -2);
     
     mBufferLength = 0;
     
@@ -1439,21 +1451,19 @@ void IGRPlotControl::setYRange(int yRangeDB){
     }
 }
 
-void IGRPlotControl::process(double sampleIn, double sampleOut){
-    mBufferPre->operator[](mBufferLength) = mEnvPre.process(sampleIn);
-    mBufferPost->operator[](mBufferLength) = mEnvPre.process(sampleOut);
-    
-    
-    
-    //plotOut->process(AmpToDB(envPlotOut.process(std::max(sample1, sample2))));
-    // double gr = envGR.process(std::max(GR1,GR2));
-    // GRplot->process(scaleValue(AmpToDB(gr), -32, 2, 2, -32));
-    
-    
+void IGRPlotControl::setGradientFill(bool enabled){
+    mGradientFill = enabled;
+}
+
+void IGRPlotControl::process(double sampleIn, double sampleOut, double sampleGR){
+    mBufferPre->operator[](mBufferLength) = sampleIn;
+    mBufferPost->operator[](mBufferLength) = sampleOut;
+    mBufferGR->operator[](mBufferLength) = sampleGR;
+
     mBufferLength++;
     
     if(mBufferLength >= mBufferPre->size()){
-        double averagePre, averagePost, GR;
+        double averagePre, averagePost, averageGR;
         
         *mDrawValsPre = mDrawValsPre->shift(1);
         *mDrawValsPost = mDrawValsPost->shift(1);
@@ -1461,25 +1471,52 @@ void IGRPlotControl::process(double sampleIn, double sampleOut){
         
         averagePre = mBufferPre->sum() / (double)mBufferPre->size();
         averagePost = mBufferPost->sum() / (double)mBufferPost->size();
+        averageGR = mBufferGR->sum() / (double)mBufferGR->size();
         
-        GR = averagePost - averagePre;
-        
-        averagePre = AmpToDB(scaleValue(averagePre, mYRange, mHeadroom, 0, 1));
+        averagePre = scaleValue(averagePre, mYRange, mHeadroom, 0, 1);
         mDrawValsPre->operator[](mDrawValsPre->size() - 1) = percentToCoordinates(averagePre);
         
-        averagePost = AmpToDB(scaleValue(averagePost, mYRange, mHeadroom, 0, 1));
+        averagePost = scaleValue(averagePost, mYRange, mHeadroom, 0, 1);
         mDrawValsPost->operator[](mDrawValsPost->size() - 1) = percentToCoordinates(averagePost);
         
-        GR = scaleValue(AmpToDB(GR), mYRange, mHeadroom, mHeadroom, mYRange);
-        mDrawValsGR->operator[](mDrawValsGR->size() - 1) = percentToCoordinates(GR);
+        averageGR = scaleValue(averageGR, mYRange, mHeadroom, 0, 1);
+        mDrawValsGR->operator[](mDrawValsGR->size() - 1) = percentToCoordinates(averageGR);
         
         
         mBufferLength = 0;
     }
 }
 
+
+void IGRPlotControl::checkChangeDPI(IGraphics* pGraphics){
+#ifdef IPLUG_RETINA_SUPPORT
+    if(pGraphics->IsRetina() != mRetina){   //Check if Retina state has changed
+        mRetina = pGraphics->IsRetina();    //Update retina state
+        if(mRetina){
+            mWidth = mRECT.W() * 2;
+            mHeight = mRECT.H() * 2;
+        }
+        else{
+            mWidth = mRECT.W();
+            mHeight = mRECT.H();
+        }
+        
+        setResolution(mRes);
+        
+        cairo_surface_destroy(surface);
+        cairo_destroy(cr);
+        
+        surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, mWidth, mHeight);
+        cr = cairo_create(surface);
+    }
+#endif
+}
+
+
 bool IGRPlotControl::Draw(IGraphics* pGraphics){
-    
+#ifdef IPLUG_RETINA_SUPPORT
+    checkChangeDPI(pGraphics);
+#endif
     cairo_save(cr);
     cairo_set_source_rgba(cr, 0, 0, 0, 0);
     cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
@@ -1489,16 +1526,16 @@ bool IGRPlotControl::Draw(IGraphics* pGraphics){
     //surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, mWidth, mHeight);
     //cr = cairo_create(surface);
     
-#ifdef IPLUG_RETINA_SUPPORT
-    cairo_set_line_width(cr, mLineWeight * 2);
-#else
-    cairo_set_line_width(cr, mLineWeight);
-#endif
-    
+    if(mRetina){
+        cairo_set_line_width(cr, mLineWeight * 2);
+    }
+    else{
+        cairo_set_line_width(cr, mLineWeight);
+    }
     ////////////////////////////////////////////////////////////////////////////////PRE
     
     //Starting point in bottom left corner.
-    cairo_move_to(cr, -1, mHeight+1);
+    cairo_move_to(cr, -4, mHeight+4);
     
     //Draw data points
     for (int i = 0, x = 0; x < mWidth && i < mDrawValsPre->size(); i++) {
@@ -1506,9 +1543,9 @@ bool IGRPlotControl::Draw(IGraphics* pGraphics){
         x += mSpacing;
     }
     
-    cairo_line_to(cr, mWidth+1, mDrawValsPre->operator[](mDrawValsPre->size()-1));
+    cairo_line_to(cr, mWidth+4, mDrawValsPre->operator[](mDrawValsPre->size()-1));
     //Endpoint in bottom right corner
-    cairo_line_to(cr, mWidth+1, mHeight+1);
+    cairo_line_to(cr, mWidth+4, mHeight+4);
     
     cairo_close_path(cr);
     
@@ -1517,9 +1554,11 @@ bool IGRPlotControl::Draw(IGraphics* pGraphics){
     ////////////////////////////////////////////////////////////////////////////////PRE
     
     ////////////////////////////////////////////////////////////////////////////////POST
+    cairo_new_path(cr);
+
     
     //Starting point in bottom left corner.
-    cairo_move_to(cr, -1, mHeight+1);
+    cairo_move_to(cr, -4, mHeight+4);
     
     //Draw data points
     for (int i = 0, x = 0; x < mWidth && i < mDrawValsPost->size(); i++) {
@@ -1527,37 +1566,22 @@ bool IGRPlotControl::Draw(IGraphics* pGraphics){
         x += mSpacing;
     }
     
-    cairo_line_to(cr, mWidth+1, mDrawValsPost->operator[](mDrawValsPost->size()-1));
+    cairo_line_to(cr, mWidth+4, mDrawValsPre->operator[](mDrawValsPre->size()-1));
     //Endpoint in bottom right corner
-    cairo_line_to(cr, mWidth+1, mHeight+1);
+    cairo_line_to(cr, mWidth+4, mHeight+4);
     
     cairo_close_path(cr);
     
     cairo_path_t* pathPost = cairo_copy_path(cr);
     
-    //Starting point in bottom left corner.
-    cairo_move_to(cr, -1, -1);
-    
-    //Draw data points
-    for (int i = 0, x = 0; x < mWidth && i < mDrawValsPost->size(); i++) {
-        cairo_line_to(cr, x, mDrawValsPost->operator[](i));
-        x += mSpacing;
-    }
-    
-    cairo_line_to(cr, mWidth+1, mDrawValsPost->operator[](mDrawValsPost->size()-1));
-    //Endpoint in bottom right corner
-    cairo_line_to(cr, mWidth+1, -1);
-    
-    cairo_close_path(cr);
-    
-    cairo_path_t* pathClip = cairo_copy_path(cr);
     
     ////////////////////////////////////////////////////////////////////////////////POST
     
-    
+    cairo_new_path(cr);
+
     
     //Starting point in top left corner.
-    cairo_move_to(cr, -2, -2);
+    cairo_move_to(cr, -8, -8);
     
     //Draw data points
     for (int i = 0, x = 0; x < mWidth && i < mDrawValsGR->size(); i++) {
@@ -1565,56 +1589,64 @@ bool IGRPlotControl::Draw(IGraphics* pGraphics){
         x += mSpacing;
     }
     
-    cairo_line_to(cr, mWidth+4, mDrawValsGR->operator[](mDrawValsGR->size()-1));
+    cairo_line_to(cr, mWidth+8, mDrawValsGR->operator[](mDrawValsGR->size()-1));
     
     //Endpoint in top right corner
-    cairo_line_to(cr, mWidth+4, -4);
+    cairo_line_to(cr, mWidth+8, -8);
     
     cairo_close_path(cr);
     
     cairo_path_t* pathGR = cairo_copy_path(cr);
     
-    ////////////////////////////////////////////////////////////////////////////////POST
+    ////////////////////////////////////////////////////////////////////////////////GR
     
-    
-    cairo_new_path(cr);
-    
-    cairo_append_path(cr, pathClip);
-    cairo_clip(cr);
     cairo_new_path(cr);
     cairo_append_path(cr, pathPre);
     cairo_set_source_rgba(cr, mPreFillColor.R, mPreFillColor.G, mPreFillColor.B, mPreFillColor.A);
     cairo_fill(cr);
     
-    cairo_reset_clip(cr);
+    
+    cairo_new_path(cr);
     cairo_append_path(cr, pathPost);
-    cairo_set_source_rgba(cr, mColorFill.R, mColorFill.G, mColorFill.B, mColorFill.A);
-    cairo_fill(cr);
+    
+    if(mGradientFill){
+        cairo_pattern_t* grad = cairo_pattern_create_linear(0, 0, 0, mHeight);
+        
+        cairo_pattern_add_color_stop_rgba(grad, .5, mColorFill.R, mColorFill.G, mColorFill.B, mColorFill.A);
+        cairo_pattern_add_color_stop_rgba(grad, 1, mColorFill.R, mColorFill.G, mColorFill.B, 0.3);
+        
+        cairo_set_source(cr, grad);
+        cairo_fill(cr);
+        cairo_pattern_destroy(grad);
+    }
+    else{
+        cairo_set_source_rgba(cr, mColorFill.R, mColorFill.G, mColorFill.B, mColorFill.A);
+        cairo_fill(cr);
+    }
+    
+    cairo_new_path(cr);
+
     cairo_append_path(cr, pathPost);
     cairo_set_source_rgba(cr, mColorLine.R, mColorLine.G, mColorLine.B, mColorLine.A);
     
-    if(mRetina){
-        cairo_set_line_width(cr, mLineWeight * 2);
-    }
-    else{
-        cairo_set_line_width(cr, mLineWeight);
-    }
+
     cairo_stroke(cr);
     
-    cairo_append_path(cr, pathGR);
-    cairo_set_source_rgba(cr, mGRFillColor.R, mGRFillColor.G, mGRFillColor.B, mGRFillColor.A);
-    cairo_fill(cr);
+
+    if(mRetina){
+        cairo_set_line_width(cr, mLineWeight * 2 + 2);
+    }
+    else{
+        cairo_set_line_width(cr, mLineWeight + 1);
+    }
+    
+    cairo_new_path(cr);
+
     cairo_append_path(cr, pathGR);
     cairo_set_source_rgba(cr, mGRLineColor.R, mGRLineColor.G, mGRLineColor.B, mGRLineColor.A);
-    if(mRetina){
-        cairo_set_line_width(cr, 3);
-    }
-    else{
-        cairo_set_line_width(cr, 1.5);
-    }
+
     cairo_stroke(cr);
     
-    cairo_path_destroy(pathClip);
     cairo_path_destroy(pathPre);
     cairo_path_destroy(pathPost);
     cairo_path_destroy(pathGR);
@@ -1662,9 +1694,15 @@ void ICompressorPlotControl::calc(){
     SetDirty();
 }
 
+
+
+
+
 bool ICompressorPlotControl::Draw(IGraphics* pGraphics){
     
+#ifdef IPLUG_RETINA_SUPPORT
     checkChangeDPI(pGraphics);
+#endif
     
     cairo_save(cr);
     cairo_set_source_rgba(cr, 0, 0, 0, 0);
@@ -1730,7 +1768,9 @@ IThresholdPlotControl::IThresholdPlotControl(IPlugBase* pPlug, IRECT pR, int par
 
 bool IThresholdPlotControl::Draw(IGraphics* pGraphics){
     
+#ifdef IPLUG_RETINA_SUPPORT
     checkChangeDPI(pGraphics);
+#endif
     
     cairo_save(cr);
     cairo_set_source_rgba(cr, 0, 0, 0, 0);

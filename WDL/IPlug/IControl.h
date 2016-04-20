@@ -856,16 +856,20 @@ public:
     
     void setYRange(int yRangeDB);
     
+    void setGradientFill(bool enabled);
     
-    void process(double sampleIn, double sampleOut);
+    void process(double sampleIn, double sampleOut, double sampleGR);
+    
+    void checkChangeDPI(IGraphics* pGraphics);
     
     bool Draw(IGraphics* pGraphics);
     
 protected:
     double mTimeScale, sr;
-    int mBufferLength, mXRes, mSpacing, mYRange, mHeadroom;
-    valarray<double> *mBufferPre, *mBufferPost, *mDrawValsPre, *mDrawValsPost, *mDrawValsGR;
-    envFollower mEnvPre, mEnvPost, mEnvGR;
+    int mBufferLength, mXRes, mSpacing, mYRange, mHeadroom, mRes;
+    valarray<double> *mBufferPre, *mBufferPost, *mBufferGR, *mDrawValsPre, *mDrawValsPost, *mDrawValsGR;
+
+    bool mGradientFill;
     
     CColor mPreFillColor, mGRLineColor, mGRFillColor;
     
@@ -950,6 +954,7 @@ class IThresholdPlotControl : public ICairoPlotControl
 {
 public:
     IThresholdPlotControl(IPlugBase* pPlug, IRECT pR, int paramIdx, IColor* lineColor, compressor* comp);
+    
     
     bool Draw(IGraphics* pGraphics);
     

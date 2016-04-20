@@ -59,7 +59,7 @@ public:
         hold = holdMS;
     }
     
-    void setMode(int detectorMode){
+    void setDetectMode(int detectorMode){
         mode = detectorMode;
     }
     
@@ -150,6 +150,10 @@ public:
         calcSlope();
     }
     
+    void setMode(int mode){
+        mMode = mode;
+        calcSlope();
+    }
     
     double getThreshold(){ return mThreshold; }
     double getAttack(){ return attack; }

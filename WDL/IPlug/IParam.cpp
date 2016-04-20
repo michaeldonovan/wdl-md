@@ -1,5 +1,6 @@
 #include "IParam.h"
 #include <stdio.h>
+#include <sstream>
 
 IParam::IParam()
   : mType(kTypeNone)
@@ -219,3 +220,4 @@ void IParam::GetBounds(double* pMin, double* pMax)
   *pMin = mMin;
   *pMax = mMax;
 }
+

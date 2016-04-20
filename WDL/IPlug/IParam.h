@@ -102,6 +102,7 @@ private:
     char mText[MAX_PARAM_DISPLAY_LEN];
   };
   
+    
   WDL_TypedBuf<DisplayText> mDisplayTexts;
 };
 
